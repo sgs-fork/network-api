@@ -409,7 +409,7 @@ fn get_proof_multiplier_from_env() -> f64 {
             if let (Ok(min), Ok(max)) = (min_str.trim().parse::<f64>(), max_str.trim().parse::<f64>()) {
                 let mut rng = rand::thread_rng();
                 let random_value = rng.gen_range(min..=max);
-                return format!("{:.1}", random_value).parse().unwrap();
+                return (random_value * 10.0).round() / 10.0;
             }
         }
     }
