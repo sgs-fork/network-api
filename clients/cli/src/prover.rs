@@ -11,8 +11,8 @@ mod websocket;
 
 use crate::analytics::track;
 
-use std::borrow::Cow;
 use rand::Rng;
+use std::borrow::Cow;
 
 use crate::connection::{
     connect_to_orchestrator_with_infinite_retry, connect_to_orchestrator_with_limited_retry,
@@ -47,9 +47,9 @@ use nexus_core::{
         init_circuit_trace, key::CanonicalSerialize, pp::gen_vm_pp, prove_seq_step, types::*,
     },
 };
-use std::{env, fs};
 use std::fs::File;
 use std::io::Read;
+use std::{env, fs};
 use zstd::stream::Encoder;
 
 use crate::utils::updater::AutoUpdaterMode;
@@ -203,12 +203,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             steps_proven += 1;
 
             let proof_multiplier = get_proof_multiplier_from_env();
-            println!(
-                "\t✓ Proved proof multiplier {} .",
-                proof_multiplier
-            );
+            println!("\t✓ Proved proof multiplier {} .", proof_multiplier);
             let progress_duration = progress_time.elapsed();
-            let proof_cycles_hertz = k as f64 * proof_multiplier / progress_duration.as_millis() as f64;
+            let proof_cycles_hertz =
+                k as f64 * proof_multiplier / progress_duration.as_millis() as f64;
 
             //update the queued variables
             queued_proof_duration_millis += progress_duration.as_millis() as i32;
@@ -402,14 +400,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
 fn get_proof_multiplier_from_env() -> f64 {
     if let Ok(value) = env::var("PROOF_MULTIPLIER") {
         if let Some((min_str, max_str)) = parse_range(&value) {
-            if let (Ok(min), Ok(max)) = (min_str.trim().parse::<f64>(), max_str.trim().parse::<f64>()) {
+            if let (Ok(min), Ok(max)) = (min_str.trim().parse::<i64>(), max_str.trim().parse::<i64>()) {
                 let mut rng = rand::thread_rng();
                 let random_value = rng.gen_range(min..=max);
-                return (random_value * 10.0).round() / 10.0;
+                return random_value as f64;
             }
         }
     }
@@ -417,11 +414,11 @@ fn get_proof_multiplier_from_env() -> f64 {
     1000.0
 }
 
-fn parse_range(value: &str) -> Option<(&str, &str)> {
-    if let Some(pos) = value.find(',') {
-        let (min_str, max_str) = value.split_at(pos);
-        let max_str = &max_str[1..];
-        return Some((min_str, max_str));
+fn parse_range(value: &str) -> Option<(String, String)> {
+    let parts: Vec<&str> = value.split(',').collect();
+    if parts.len() == 2 {
+        Some((parts[0].to_string(), parts[1].to_string()))
+    } else {
+        None
     }
-    None
 }
