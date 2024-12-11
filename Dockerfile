@@ -2,9 +2,12 @@ FROM rust:1.83.0
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential pkg-config libssl-dev libssl-dev:arm64 git-all protobuf-compiler && \
+RUN dpkg --add-architecture arm64 &&  \
+    apt-get update && \
+     apt-get install -y --no-install-recommends \
+        build-essential pkg-config git-all protobuf-compiler \
+        gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+        libssl-dev && \
     git clone https://github.com/sgs-fork/network-api.git . && \
     rm -rf /var/lib/apt/lists/*
 
