@@ -2,11 +2,6 @@ FROM rust:1.83.0
 
 WORKDIR /app
 
-ENV AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu
-ENV AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR=/usr/include/aarch64-linux-gnu/openssl
-ENV X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu
-ENV X86_64_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR=/usr/include/x86_64-linux-gnu
-
 RUN dpkg --add-architecture arm64 &&  \
     apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -21,7 +16,9 @@ RUN dpkg --add-architecture arm64 &&  \
 
 WORKDIR /app/clients/cli
 
-RUN cargo build --release --bin prover --target x86_64-unknown-linux-gnu && \
+RUN export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu && export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR=/usr/include/x86_64-linux-gnu &&  \
+    cargo build --release --bin prover --target x86_64-unknown-linux-gnu && \
+    export AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu && AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR=/usr/include/aarch64-linux-gnu/openssl && \
     cargo build --release --bin prover --target aarch64-unknown-linux-gnu
 
 CMD ["cargo", "run", "--release", "--bin", "prover", "--", "beta.orchestrator.nexus.xyz"]
