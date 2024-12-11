@@ -12,7 +12,7 @@ RUN dpkg --add-architecture arm64 &&  \
     rm -rf /var/lib/apt/lists/*
 
 RUN rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
-
+ENV OPENSSL_DIR=/usr/lib/ssl
 WORKDIR /app/clients/cli
 
 RUN cargo build --release --bin prover --target x86_64-unknown-linux-gnu && \
