@@ -12,9 +12,10 @@ RUN rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
 
 WORKDIR /app/clients/cli
 
-RUN cargo build --release --bin prover --target x86_64-unknown-linux-gnu
-RUN cargo build --release --bin prover --target aarch64-unknown-linux-gnu
+RUN cargo build --release --bin prover --target x86_64-unknown-linux-gnu && \
+    cargo build --release --bin prover --target aarch64-unknown-linux-gnu
 
-RUN cargo build --release --bin prover
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-CMD ["cargo", "run", "--release", "--bin", "prover", "--", "beta.orchestrator.nexus.xyz"]
+CMD ["/app/entrypoint.sh"]
