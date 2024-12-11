@@ -14,9 +14,7 @@ RUN dpkg --add-architecture arm64 &&  \
     apt-get install -y \
         build-essential pkg-config git-all protobuf-compiler \
         gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-        libc6-dev-arm64-cross qemu qemu-user-static binfmt-support \
         openssl libssl-dev libssl-dev:arm64 && \
-    update-binfmts --enable qemu-aarch64 && \
     rm -rf /var/lib/apt/lists/* && \
     rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu && \
     git clone https://github.com/sgs-fork/network-api.git .
