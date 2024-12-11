@@ -12,9 +12,9 @@ ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-g
 RUN dpkg --add-architecture arm64 &&  \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        binfmt-support build-essential pkg-config git-all protobuf-compiler \
+        build-essential pkg-config git-all protobuf-compiler \
         gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-        libc6-dev-arm64-cross qemu-user-static \
+        libc6-dev-arm64-cross qemu qemu-user-static binfmt-support \
         libssl-dev libssl-dev:arm64 && \
     update-binfmts --enable qemu-aarch64 && \
     rm -rf /var/lib/apt/lists/* && \
