@@ -408,7 +408,8 @@ fn get_proof_multiplier_from_env() -> f64 {
         if let Some((min_str, max_str)) = parse_range(&value) {
             if let (Ok(min), Ok(max)) = (min_str.trim().parse::<f64>(), max_str.trim().parse::<f64>()) {
                 let mut rng = rand::thread_rng();
-                return rng.gen_range(min..=max);
+                let random_value = rng.gen_range(min..=max);
+                return format!("{:.1}", random_value).parse().unwrap();
             }
         }
     }
