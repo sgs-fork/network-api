@@ -1,11 +1,17 @@
 use colored::Colorize;
 use rand::RngCore;
 use random_word::Lang;
-use std::{fs, path::Path, path::PathBuf};
+use std::{env, fs, path::Path, path::PathBuf};
 
 /// Gets an existing prover ID from the filesystem or generates a new one
 /// This is the main entry point for getting a prover ID
 pub fn get_or_generate_prover_id() -> String {
+
+    if let Some(prover_id) = get_prover_id_from_env() {
+        println!("Successfully read prover-id from environment variable: {}", prover_id);
+        return prover_id;
+    }
+
     let default_prover_id = generate_default_id();
 
     let home_path = match get_home_directory() {
@@ -41,6 +47,10 @@ pub fn get_or_generate_prover_id() -> String {
             default_prover_id
         }
     }
+}
+
+fn get_prover_id_from_env() -> Option<String> {
+    env::var("PROVER_ID").ok()
 }
 
 fn generate_default_id() -> String {
