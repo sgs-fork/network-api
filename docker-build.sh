@@ -11,7 +11,7 @@ fi
 NEXUS_VERSION=1.0
 
 docker buildx create --use
-docker buildx build --platform linux/amd64,linux/arm64 -t sigeshuo/nexus:1.0 -t sigeshuo/nexus:latest . --no-cache --push
+docker buildx build -t sigeshuo/nexus:1.0 -t sigeshuo/nexus:latest . --no-cache --load
 
 #docker login
 #
