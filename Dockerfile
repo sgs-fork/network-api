@@ -8,7 +8,13 @@ RUN apt-get update && \
     git clone https://github.com/sgs-fork/network-api.git . && \
     rm -rf /var/lib/apt/lists/*
 
+RUN rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+
 WORKDIR /app/clients/cli
+
+RUN cargo build --release --bin prover --target x86_64-unknown-linux-gnu
+RUN cargo build --release --bin prover --target aarch64-unknown-linux-gnu
+
 RUN cargo build --release --bin prover
 
 CMD ["cargo", "run", "--release", "--bin", "prover", "--", "beta.orchestrator.nexus.xyz"]
