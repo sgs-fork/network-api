@@ -10,8 +10,8 @@ fi
 
 NEXUS_VERSION=1.0
 docker buildx prune -f
-docker buildx build --platform linux/arm64 -t sigeshuo/nexus:1.0-aarch64 -f Dockerfile-aarch64 . --no-cache --push --pull --debug
-#docker buildx build --platform linux/arm64 -t sigeshuo/nexus:${NEXUS_VERSION}-aarch64 . --no-cache --push --pull --debug
+docker buildx build --platform linux/arm64 -t sigeshuo/nexus:1.0-aarch64 -f Dockerfile-aarch64 . --no-cache --push --pull --progress=plain
+#docker buildx build --platform linux/arm64 -t sigeshuo/nexus:${NEXUS_VERSION}-aarch64 . --no-cache --push --pull
 
 #docker login
 #
