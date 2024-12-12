@@ -1,31 +1,42 @@
-FROM rust:1.83.0
-
+FROM rust:1.83 AS builder
 WORKDIR /app
 
-ENV AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu
-ENV AARCH64_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR=/usr/include/aarch64-linux-gnu/openssl
-ENV X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu
-ENV X86_64_UNKNOWN_LINUX_GNU_OPENSSL_INCLUDE_DIR=/usr/include/x86_64-linux-gnu
-ENV PKG_CONFIG_ALLOW_CROSS=1
-ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig
-
-RUN dpkg --add-architecture arm64 &&  \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y \
-        build-essential pkg-config git-all protobuf-compiler \
-        gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-        openssl libssl-dev libssl-dev:arm64 && \
-    rm -rf /var/lib/apt/lists/* && \
-    rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu && \
-    git clone https://github.com/sgs-fork/network-api.git .
+            build-essential \
+            pkg-config \
+            git-all \
+            protobuf-compiler \
+            libssl-dev \
+            clang \
+            gcc-x86-64-linux-gnu \
+            gcc-aarch64-linux-gnu \
+            g++-x86-64-linux-gnu \
+            g++-aarch64-linux-gnu \
+            && rm -rf /var/lib/apt/lists/*
+
+RUN git clone https://github.com/sgs-fork/network-api.git .
+
+RUN rustup target add x86_64-unknown-linux-gnu \
+                     aarch64-unknown-linux-gnu \
+                     x86_64-apple-darwin \
+                     aarch64-apple-darwin
 
 WORKDIR /app/clients/cli
 
 RUN cargo build --release --bin prover --target x86_64-unknown-linux-gnu && \
-    cargo build --release --bin prover --target aarch64-unknown-linux-gnu
+    cargo build --release --bin prover --target aarch64-unknown-linux-gnu && \
+    cargo build --release --bin prover --target x86_64-apple-darwin && \
+    cargo build --release --bin prover --target aarch64-apple-darwin
 
-CMD ["cargo", "run", "--release", "--bin", "prover", "--", "beta.orchestrator.nexus.xyz"]
-#COPY entrypoint.sh /app/entrypoint.sh
-#RUN chmod +x /app/entrypoint.sh
+FROM debian:bullseye
 
-#CMD ["/app/entrypoint.sh"]
+WORKDIR /app
+
+COPY --from=builder /app/clients/cli/target/x86_64-unknown-linux-gnu/release/prover /app/prover-linux-amd64
+COPY --from=builder /app/clients/cli/target/aarch64-unknown-linux-gnu/release/prover /app/prover-linux-arm64
+COPY --from=builder /app/clients/cli/target/x86_64-apple-darwin/release/prover /app/prover-darwin-amd64
+COPY --from=builder /app/clients/cli/target/aarch64-apple-darwin/release/prover /app/prover-darwin-arm64
+
+CMD ["sh", "-c", "if [ $(uname -m) = 'x86_64' ]; then if [ $(uname) = 'Darwin' ]; then exec /app/prover-darwin-amd64; else exec /app/prover-linux-amd64; fi; elif [ $(uname -m) = 'aarch64' ]; then if [ $(uname) = 'Darwin' ]; then exec /app/prover-darwin-arm64; else exec /app/prover-linux-arm64; fi; fi"]
+
